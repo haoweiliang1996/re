@@ -4,14 +4,13 @@ import sys
 
 import mxnet as mx
 
-from ssd.detect.detector import Detector
 from ssd.symbol.symbol_factory import get_symbol
 
 curr_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(curr_path, '..'))
 
 
-def get_detector(net, prefix, epoch, data_shape, mean_pixels, ctx, num_class,
+def get_detector(net, prefix, epoch, data_shape, mean_pixels, ctx, num_class, detector_class,
                  nms_thresh=0.5, force_nms=True, nms_topk=400):
     """
     wrapper for initialize a detector
@@ -40,8 +39,8 @@ def get_detector(net, prefix, epoch, data_shape, mean_pixels, ctx, num_class,
     if net is not None:
         net = get_symbol(net, data_shape, num_classes=num_class, nms_thresh=nms_thresh,
                          force_nms=force_nms, nms_topk=nms_topk)
-    detector = Detector(net, prefix, epoch, data_shape, mean_pixels, ctx=ctx)
-    return detector
+    d = detector_class(net, prefix, epoch, data_shape, mean_pixels, ctx=ctx)
+    return d
 
 
 def parse_args():
@@ -109,12 +108,13 @@ def parse_class_names(class_names):
     return class_names
 
 
-def get_ssd_model(network='resnet50', prefix='ssd/model/type1/ssd', epoch=0, data_shape=(320, 220), ctx=mx.cpu(),
+def get_ssd_model(detector_class, network='resnet50', prefix='ssd/checkpoint/type3/ssd', epoch=0, data_shape=(320, 220),
+                  ctx=mx.cpu(),
                   nms_thresh=0.5, force_nms=True, class_names=['cloths', ]):
     d = get_detector(network, prefix, epoch,
                      data_shape,
                      (123, 117, 104),
-                     ctx, len(class_names), nms_thresh, force_nms)
+                     ctx, len(class_names), detector_class, nms_thresh, force_nms)
     '''
     cache_name = osp.join('cache','detector.pickle')
     if osp.exists(cache_name):
@@ -143,4 +143,3 @@ if __name__ == '__main__':
         get_ssd_model()
     except KeyError as e:
         print(e)
-

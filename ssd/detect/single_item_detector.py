@@ -11,12 +11,10 @@ from ssd.detect.detector import Detector
 from ssd import demo
 
 
-# Todo 这里和试验的时候不一致
-class ColorDetector(Detector):
-    def visualize_detection_to_memory(self, img, dets, classes=[], thresh=0.25, img_name='test.jpg', output_dir='.',
-                                      show_img=False):
+class SingleItemDetector(Detector):
+    def visualize_detection_to_memory(self, img, dets, classes=[], thresh=0.6, img_name='test.jpg', output_dir='.'):
         """
-        visualize detections to memory
+        visualize detections in one image
 
         Parameters:
         ----------
@@ -30,11 +28,9 @@ class ColorDetector(Detector):
         thresh : float
             score threshold
         """
-        res = []
-        position = []
         height = img.shape[0]
         width = img.shape[1]
-        for i in range(dets.shape[0]):
+        for i in range(min(1, dets.shape[0])):  # range(dets.shape[0]):
             cls_id = int(dets[i, 0])
             if cls_id >= 0:
                 score = dets[i, 1]
@@ -44,18 +40,28 @@ class ColorDetector(Detector):
                     xmax = int(dets[i, 4] * width)
                     ymax = int(dets[i, 5] * height)
                     img_out = img[ymin:ymax, xmin:xmax]
-                    position.append(dets[i, 1:])
-                    res.append(img_out)
-        if len(res) == 0:
-            res = [mx.image.CenterCropAug((112, 112))(mx.nd.array(img)).asnumpy(), ]
-        return position, res
-
+                    return dets[i, 1:], img_out
+        return None, None
 
 if __name__ == '__main__':
+    model = demo.get_ssd_model(detector_class=SingleItemDetector,
+                               prefix=os.path.join(curr_path, '../', 'checkpoint', 'type3', 'ssd'), ctx=mx.cpu())
+
+    img = cv2.imread(os.path.join('/Users/haowei/Downloads', 'TB2dudIjDlYBeNjSszcXXbwhFXa_!!2120460599.jpg'))
+    pos, imgs = model.detect_and_return(img, thresh=0.1)
+    model.visualize_detection_matplot(pos, img)
+    if not isinstance(imgs,list):
+        imgs = [imgs,]
+    for i in imgs:
+        plt.imshow(i)
+        plt.show()
+    from ssd.detect.color_detector import ColorDetector
+
     model = demo.get_ssd_model(detector_class=ColorDetector,
                                prefix=os.path.join(curr_path, '../', 'checkpoint', 'maincolor', 'ssd'), ctx=mx.cpu())
 
-    img = cv2.imread(os.path.join('/Users/haowei/Downloads', '37245de15c3e400b8e30b61c32422f7a.jpg'))
+    img = imgs[0]
+
     pos, imgs = model.detect_and_return(img, thresh=0.25)
     model.visualize_detection_matplot(pos, img)
     for i in imgs:

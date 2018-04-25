@@ -13,6 +13,7 @@ from os.path import join
 from logger import logger
 from retrieval.retrieval.retrieval import Retrieval_model
 from ssd import demo
+from ssd.detect.detector import Detector
 
 Batch = namedtuple('Batch', ['data'])
 
@@ -24,7 +25,7 @@ class __model__():
 
     @lru_cache(maxsize=10)
     def get_mod(self, folder_name, ctx, checkpoint_name=None, batch_size=None, longth_=None, width_=None):
-        if folder_name not in ['first', 'second','detect']:
+        if folder_name not in ['first', 'second', 'detect']:
             logger.info('load model')
             sym, arg_params, aux_params = mx.model.load_checkpoint(join(folder_name, checkpoint_name), 0)
             mod = mx.mod.Module(symbol=sym, context=ctx, label_names=None)
@@ -33,7 +34,8 @@ class __model__():
             mod.set_params(arg_params, aux_params, allow_missing=True)
         elif folder_name.find('ssd_') == 0:
             logger.info('load  %s model' % folder_name)
-            mod = demo.get_ssd_model(ctx=ctx, prefix='ssd/model/%s/ssd' % folder_name.replace('ssd_', ''))
+            mod = demo.get_ssd_model(detector_class=Detector, ctx=ctx,
+                                     prefix='ssd/model/%s/ssd' % folder_name.replace('ssd_', ''))
         elif folder_name.find('retrieval_') == 0:
             logger.info('load retrieval model %s' % folder_name)
             mod = Retrieval_model(ctx=ctx, first_class_id=int(folder_name.replace('retrieval_', '')))

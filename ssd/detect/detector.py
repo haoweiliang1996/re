@@ -1,7 +1,9 @@
 from __future__ import print_function
 
+import random
 from timeit import default_timer as timer
 
+import matplotlib.pyplot as plt
 import mxnet as mx
 import numpy as np
 
@@ -68,7 +70,8 @@ class Detector(object):
         start = timer()
         for idx, (pred, _, _) in enumerate(self.mod.iter_predict(det_iter)):
             if idx % 1000 == 0:
-                print(idx)
+                if show_timer:
+                    print(idx)
             detections.append(pred[0].asnumpy())
         time_elapsed = timer() - start
         if show_timer:
@@ -120,20 +123,7 @@ class Detector(object):
         thresh : float
             score threshold
         """
-        height = img.shape[0]
-        width = img.shape[1]
-        for i in range(min(1, dets.shape[0])):  # range(dets.shape[0]):
-            cls_id = int(dets[i, 0])
-            if cls_id >= 0:
-                score = dets[i, 1]
-                if score > thresh:
-                    xmin = int(dets[i, 2] * width)
-                    ymin = int(dets[i, 3] * height)
-                    xmax = int(dets[i, 4] * width)
-                    ymax = int(dets[i, 5] * height)
-                    img_out = img[ymin:ymax, xmin:xmax]
-                    return dets[i, 2:5], img_out
-        return None, None
+        raise NotImplementedError('not imple')
 
     def detect_and_return(self, img,
                           classes=['skirt', ], thresh=0.6, show_timer=False):
@@ -158,3 +148,45 @@ class Detector(object):
         for k, det in enumerate(dets):
             # img[:, :, (0, 1, 2)] = img[:, :, (2, 1, 0)]
             return self.visualize_detection_to_memory(img, det, classes, thresh)
+
+    def visualize_detection_matplot(self, pos, img):
+        """
+        visualize detections in one image
+
+        Parameters:
+        ----------
+        img : numpy.array
+            image, in bgr format
+        dets : numpy.array
+            ssd detections, numpy.array([[id, score, x1, y1, x2, y2]...])
+            each row is one object
+        classes : tuple or list of str
+            class names
+        thresh : float
+            score threshold
+        """
+        if not isinstance(pos,list):
+            pos = [pos,]
+        plt.imshow(img)
+        height = img.shape[0]
+        width = img.shape[1]
+        colors = dict()
+        colors[0] = (random.random(), random.random(), random.random())
+        cls_id = 0
+        for det in pos:
+            score = det[0]
+            xmin = int(det[1] * width)
+            ymin = int(det[2] * height)
+            xmax = int(det[3] * width)
+            ymax = int(det[4] * height)
+            rect = plt.Rectangle((xmin, ymin), xmax - xmin,
+                                 ymax - ymin, fill=False,
+                                 edgecolor=colors[cls_id],
+                                 linewidth=3.5)
+            plt.gca().add_patch(rect)
+            class_name = str(cls_id)
+            plt.gca().text(xmin, ymin - 2,
+                           '{:s} {:.3f}'.format(class_name, score),
+                           bbox=dict(facecolor=colors[cls_id], alpha=0.5),
+                           fontsize=12, color='white')
+        plt.show()
