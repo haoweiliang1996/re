@@ -46,6 +46,8 @@ class ColorDetector(Detector):
                     img_out = img[ymin:ymax, xmin:xmax]
                     position.append(dets[i, 1:])
                     res.append(img_out)
+                    if len(res) == 3:
+                        break
         if len(res) == 0:
             res = [mx.image.CenterCropAug((112, 112))(mx.nd.array(img)).asnumpy(), ]
         return position, res
@@ -55,8 +57,11 @@ if __name__ == '__main__':
     model = demo.get_ssd_model(detector_class=ColorDetector,
                                prefix=os.path.join(curr_path, '../', 'checkpoint', 'maincolor', 'ssd'), ctx=mx.cpu())
 
-    img = cv2.imread(os.path.join('/Users/haowei/Downloads', '37245de15c3e400b8e30b61c32422f7a.jpg'))
-    pos, imgs = model.detect_and_return(img, thresh=0.25)
+    #img = cv2.imread(os.path.join('/Users/haowei/Downloads', '37245de15c3e400b8e30b61c32422f7a.jpg'))
+    img = cv2.cvtColor(cv2.imread(os.path.join('/Users/haowei/Downloads',
+                                               '37245de15c3e400b8e30b61c32422f7a.jpg')),
+                       cv2.COLOR_BGR2RGB)
+    pos, imgs = model.detect_and_return(img, thresh=0.24)
     model.visualize_detection_matplot(pos, img)
     for i in imgs:
         plt.imshow(i)

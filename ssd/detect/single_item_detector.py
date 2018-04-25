@@ -47,7 +47,7 @@ if __name__ == '__main__':
     model = demo.get_ssd_model(detector_class=SingleItemDetector,
                                prefix=os.path.join(curr_path, '../', 'checkpoint', 'type3', 'ssd'), ctx=mx.cpu())
 
-    img = cv2.imread(os.path.join('/Users/haowei/Downloads', '37245de15c3e400b8e30b61c32422f7a.jpg'))
+    img = cv2.imread(os.path.join('/Users/haowei/Downloads', '2016121823502647466.jpg'))
     pos, imgs = model.detect_and_return(img, thresh=0.1)
     model.visualize_detection_matplot(pos, img)
     if not isinstance(imgs,list):
