@@ -242,5 +242,4 @@ class __model__():
 
 model = __model__()
 if __name__ == '__main__':
-    model = __model__()
     print(model.do_color_predict(image_url='http://cdn.watoo11.com/wardrobe/201702/2017021920525869343.jpg?x-oss-process=image/resize,w_310'))

@@ -56,12 +56,16 @@ def retrieval():
                               style_level=int(js['style_level']),
                               first_class_id=int(js['class1'])))
     logger.info(res)
-    return res, model.do_color_predict(image_url=js['url'])
+    return res
 
 
 @app.route('/10004', methods=['GET', 'POST'])
-def predict_color():
+def color():
     js = ((request.get_json()))
     if js.get('url') is None:
         return 'require url'
-    return model.do_color_predict(image_url=js['url'])
+    res = model.do_color_predict(image_url=js['url'])
+    logger.info(res)
+    return str(res)
+
+
