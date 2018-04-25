@@ -45,6 +45,8 @@ def retrieval():
     js = ((request.get_json()))
     js['imgId'] = '0'
     logger.info(js)
+    if js.get('class1') is None:
+        return 'require class1'
     if js['color_level'] not in [0, 1, 2] and js['style_level'] not in [0, 1, 2]:
         return 'selected level wrong'
     if str(js['class1']) not in ['4', '5', '6', '7']:
@@ -54,4 +56,12 @@ def retrieval():
                               style_level=int(js['style_level']),
                               first_class_id=int(js['class1'])))
     logger.info(res)
-    return res
+    return res, model.do_color_predict(image_url=js['url'])
+
+
+@app.route('/10004', methods=['GET', 'POST'])
+def predict_color():
+    js = ((request.get_json()))
+    if js.get('url') is None:
+        return 'require url'
+    return model.do_color_predict(image_url=js['url'])

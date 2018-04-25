@@ -55,8 +55,8 @@ if __name__ == '__main__':
     for i in imgs:
         plt.imshow(i)
         plt.show()
-    from retrieval.attr.color import Color_model
-    model = Color_model(ctx=mx.cpu())
+    from retrieval.attr.color import ColorClassifier
+    model = ColorClassifier(ctx=mx.cpu())
     print(model.predict(imgs[0]))
     from ssd.detect.color_detector import ColorDetector
 

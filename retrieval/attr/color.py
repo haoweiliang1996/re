@@ -11,9 +11,10 @@ from mxnet import nd
 
 from retrieval.dataloader.transform import transform_val
 from retrieval.mxsymbol.symbol_factory import multiTaskClassifyNetwork
+from logger import logger
 
 
-class Color_model():
+class ColorClassifier():
     def __init__(self, ctx):
         self.lenof_labels = [17, 17]
         net = multiTaskClassifyNetwork(lenof_labels=self.lenof_labels, ctx=ctx)
@@ -54,13 +55,29 @@ class Color_model():
             res = []
             for i in sort_index:
                 i = int(i)
-                if outputs[k][0][i] >= 0.1:
+                if outputs[k][0][i] >= 0.2:
                     res.append(index2label[i])
             res = res[:3]
             preds.append(res)
-        return preds
+        temp = []
+        for i in preds:
+            temp += i
+        flatten = np.array(temp).flatten()
+        cc = 0
+        for i in flatten:
+            if int(i) == 0:
+                cc += 1
+        if cc > 2:
+            logger.info('zero in color more than two')
+            raise RuntimeError('zero in color more than two')
+        if cc == 2:
+            flag = 0
+        else:
+            flag = int(np.sum(np.unique(flatten)))
+        logger.info('flag :%s, preds %s' % (flag, str(preds)))
+        return flag
 
 
 if __name__ == '__main__':
-    model = Color_model(ctx=mx.cpu())
-    print(model.predict(cv2.imread(os.path.join('/Users/haowei/Downloads', '00_166874_middlel.jpg'))))
+    model = ColorClassifier(ctx=mx.cpu())
+    print(model.predict(cv2.imread(os.path.join('/Users/haowei/Downloads', '2017030919492019570.jpg'))))

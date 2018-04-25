@@ -53,7 +53,9 @@ class Retrieval_model():
             return np.mean(np.transpose(img, (2, 0, 1)), axis=(1, 2))
         else:
             c_detector = kwargs['color_detector']
+            tic = time()
             pos, imgs = c_detector.detect_and_return(img1, thresh=0.24)
+            logger.info('use %f time to detect color' % (time() - tic))
             if kwargs.get('debug') is not None:
                 c_detector.visualize_detection_matplot(pos, img1)
             res = []
@@ -127,8 +129,13 @@ class Retrieval_model():
         threshold_style = threshold_styles[style_level]
         color_style = color_styles[color_level]
         anchor = self.get_feature(img)
-        anchor_hist = self.get_hist(img, color_detector=kwargs['color_detector'])
+        if int(self.first_class_id) == 4:
+            anchor_hist = self.get_hist(img, color_detector=kwargs['color_detector'])
+        else:
+            anchor_hist = self.get_hist(img)
+        tic = time()
         fea_dist = np.sum((cropus_data - anchor) ** 2, axis=1)
+        logger.info('use %s second to cal distance' % (time() - tic))
         res = list(map(lambda x: x, filter(lambda x: fea_dist[x] < threshold_style, np.argsort(fea_dist)[:c1])))
         cropus_hists = self.cropus_hist[res]
         distance = np.arange(cropus_hists.shape[0]).astype(np.float32)
@@ -145,8 +152,8 @@ class Retrieval_model():
                 '''
         res = list(map(lambda x: self.cropus_index_inverse[x], temp[:c2]))
         logger.info('fea dist')
-        logger.info(list(map(lambda x: fea_dist[x], temp[:c2])))
-        logger.info(sorted(fea_dist)[:c2])
+        logger.info(list(map(lambda x: fea_dist[x], temp[:c2]))[:16])
+        # logger.info(sorted(fea_dist)[:c2])
         if len(res) == 0:
             logger.info('no result')
         elif len(res) < 10:

@@ -1,8 +1,10 @@
 # define a simple data batch
+import os
 from collections import namedtuple
 from functools import lru_cache
 from time import time
 
+curr_path = os.path.abspath(os.path.dirname(__file__))
 import cv2
 import mxnet as mx
 import numpy as np
@@ -13,7 +15,9 @@ from os.path import join
 from logger import logger
 from retrieval.retrieval.retrieval_model import Retrieval_model
 from ssd import demo
-from ssd.detect.detector import Detector
+from ssd.detect.color_detector import ColorDetector
+from ssd.detect.single_item_detector import SingleItemDetector
+from retrieval.attr.color import ColorClassifier
 
 Batch = namedtuple('Batch', ['data'])
 
@@ -25,26 +29,47 @@ class __model__():
 
     @lru_cache(maxsize=10)
     def get_mod(self, folder_name, ctx, checkpoint_name=None, batch_size=None, longth_=None, width_=None):
-        if folder_name not in ['first', 'second', 'detect']:
-            logger.info('load model')
+        """
+        use get_mod to save model to memory
+        :param folder_name:
+        :param ctx:
+        :param checkpoint_name:
+        :param batch_size:
+        :param longth_:
+        :param width_:
+        :return: a model for some task
+        """
+        tic = time()
+        if folder_name in ['first', 'second', 'detect']:
             sym, arg_params, aux_params = mx.model.load_checkpoint(join(folder_name, checkpoint_name), 0)
             mod = mx.mod.Module(symbol=sym, context=ctx, label_names=None)
             mod.bind(for_training=False, data_shapes=[('data', (batch_size, 3, longth_, width_))],
                      label_shapes=mod._label_shapes)
             mod.set_params(arg_params, aux_params, allow_missing=True)
         elif folder_name.find('ssd_') == 0:
-            logger.info('load  %s model' % folder_name)
-            mod = demo.get_ssd_model(detector_class=Detector, ctx=ctx,
-                                     prefix='ssd/model/%s/ssd' % folder_name.replace('ssd_', ''))
+            suffix = folder_name.replace('ssd_', '')
+            if suffix == 'maincolor':
+                detector = ColorDetector
+            elif suffix == 'type3':
+                detector = SingleItemDetector
+            else:
+                raise NotImplementedError('no such detector! %s' % suffix)
+            mod = demo.get_ssd_model(detector_class=detector, ctx=ctx,
+                                     prefix='ssd/checkpoint/%s/ssd' % suffix)
         elif folder_name.find('retrieval_') == 0:
-            logger.info('load retrieval model %s' % folder_name)
             mod = Retrieval_model(ctx=ctx, first_class_id=int(folder_name.replace('retrieval_', '')))
+        elif folder_name.find('attr_') == 0:
+            suffix = folder_name.replace('attr_', '')
+            if suffix == 'color':
+                mod = ColorClassifier(ctx=ctx)
         else:
             raise NotImplementedError('No Such model')
+        logger.info('use %f second to load %s' % (time() - tic, folder_name))
         return mod
 
     @lru_cache(maxsize=16)
     def get_img(self, url, model_level, img_path=None):
+        tic = time()
         if img_path is None:
             r = requests.get(url)
             img = cv2.imdecode(np.frombuffer(r.content, np.uint8), cv2.IMREAD_COLOR)
@@ -63,7 +88,7 @@ class __model__():
             mark = True
         if model_level in [1, 10001]:
             longer_side_length = 160
-        elif model_level in [2, 10002, 10003]:
+        elif model_level in [2, ]:
             longer_side_length = 320
         if model_level in [10002, 10003]:
             longer_side_length = 640
@@ -72,32 +97,45 @@ class __model__():
         ratio = longer_side_length / img.shape[0]
         img = cv2.resize(img, (0, 0), fx=ratio, fy=ratio)
         # convert into format (batch, RGB, width, height)
+        logger.info('use %f seconds to get img' % (time() - tic))
         return img, origin_img
 
     @lru_cache(maxsize=16)
     def ssd(self, image_url, model_name, ctx):
         folder_name = 'ssd_%s' % model_name
-        tic = time()
         mod = self.get_mod(folder_name=folder_name, ctx=ctx)
-        logger.info('use {}s to get model '.format(str(time() - tic)))
         img, _ = self.get_img(image_url, 10002)
-        return mod.detect_and_return(img, thresh=0.5)
+        tic3 = time()
+        _det, img = mod.detect_and_return(img, thresh=0.5)
+        logger.info('use {}s to ssd t3'.format(str(time() - tic3)))
+        return _det, img
 
-    @lru_cache(maxsize=16)
+    @lru_cache(maxsize=32)
     def retrieval(self, image_url, first_class_id, color_level=1, style_level=0, ctx=mx.cpu()):
         tic = time()
-        _det, img = self.ssd(image_url, 'type1', ctx=ctx)
-        tic2 = time()
-        logger.info('use {}s to ssd '.format(str(tic2 - tic)))
+        _det, img = self.ssd(image_url, 'type3', ctx=ctx)
+        # logger.info('use {}s to ssd t3'.format(str(tic2 - tic)))
         # img,_ = self.get_img(image_url,model_level=10003)
         if img is None:
-            logger.info('no skirt detected')
+            logger.info('no cloth detected')
             return ''
-        folder_name = 'retrieval'
+        tic2 = time()
+        folder_name = 'retrieval_%s' % first_class_id
         mod = self.get_mod(folder_name=folder_name, ctx=ctx)
-        res = mod.search_database(img, mod.database[0], color_level, style_level)
+        if int(first_class_id) == 4:
+            res = mod.search_database(img, mod.database[0], color_level, style_level,
+                                      color_detector=self.get_mod(folder_name='ssd_maincolor', ctx=ctx))
+        else:
+            res = mod.search_database(img, mod.database[0], color_level, style_level)
         logger.info('use {}s to search database '.format(str(time() - tic2)))
         return res
+
+    @lru_cache(maxsize=128)
+    def do_color_predict(self,image_url,ctx=mx.cpu()):
+        color_classifier = self.get_mod(folder_name='attr_color',ctx=ctx)
+        img, origin_img = self.get_img(url=image_url, model_level=10002)
+        return color_classifier.predict(img)
+
 
     # @lru_cache()
     def do_multi_predict(self, image_url, model_level, img_id, first_class_id=None, num_id=None, batch_size=1, tt=1,
@@ -205,6 +243,4 @@ class __model__():
 model = __model__()
 if __name__ == '__main__':
     model = __model__()
-    print(type(int(model.do_multi_predict(
-        'https://static.leiphone.com/uploads/new/article/740_740/201711/5a002bed9cf7f.png?imageMogr2/format/jpg/quality/90',
-        1, tt=5))))
+    print(model.do_color_predict(image_url='http://cdn.watoo11.com/wardrobe/201702/2017021920525869343.jpg?x-oss-process=image/resize,w_310'))
