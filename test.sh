@@ -19,8 +19,6 @@ pic=http://cdn.watoo11.com/wardrobe/201702/2017021920525869343.jpg?x-oss-process
 ##pic=https://img.alicdn.com/bao/uploaded/i2/2089135099/TB1NXWBaiERMeJjSspiXXbZLFXa_!!0-item_pic.jpg
 #curl -v -X POST "http://47.104.25.10:80/1" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":1}"
 #curl -v -X POST "http://127.0.0.1:5000/10003" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":1}"
-curl -v -X POST "http://127.0.0.1:5000/10004" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":4,\"color_level\":0,\"style_level\":2}"
-curl -v -X POST "http://127.0.0.1:5000/10003" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":4,\"color_level\":0,\"style_level\":2}"
 #curl -v -X POST "http://47.104.25.10:80/2" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":1}"
 #curl -v -X POST "http://47.104.25.10:80/2" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"imgId\":1,\"class1\":4}" 
 #curl -v -X POST "http://47.104.25.10:80/2" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"imgId\":1,\"class1\":5}" 
@@ -29,8 +27,10 @@ curl -v -X POST "http://127.0.0.1:5000/10003" -H "Content-Type: application/json
 
 
 #curl -v -X POST "http://127.0.0.1:5000/10002" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":1}"
-#curl -v -X POST "http://127.0.0.1:5000/1" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":1}"
-#curl -v -X POST "http://127.0.0.1:5000/2" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"imgId\":1,\"class1\":4}"
+curl -v -X POST "http://127.0.0.1:5000/1" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":1}"
+curl -v -X POST "http://127.0.0.1:5000/2" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"imgId\":1,\"class1\":4}"
 #curl -v -X POST "http://127.0.0.1:5000/2"  -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"imgId\":1,\"class1\":5}"
 #curl -v -X POST "http://127.0.0.1:5000/2" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"imgId\":1,\"class1\":7}"
 #curl -v -X POST  "http://127.0.0.1:5000/2" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"imgId\":1,\"class1\":10}"
+#curl -v -X POST "http://127.0.0.1:5000/10004" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":4,\"color_level\":0,\"style_level\":2}"
+#curl -v -X POST "http://127.0.0.1:5000/10003" -H "Content-Type: application/json" --data-ascii "{\"url\":\"$pic\",\"class1\":4,\"color_level\":0,\"style_level\":2}"
