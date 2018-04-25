@@ -169,7 +169,7 @@ if __name__ == '__main__':
     # imglist = read_to_list(test_txt_path)
 
     tic = time()
-    fea1 = model.get_feature('../demo/2.png', tt=1)
+    fea1 = model.get_fetaure('../demo/2.png', tt=1)
     print(time() - tic)
     import time
 

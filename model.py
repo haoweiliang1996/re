@@ -24,7 +24,7 @@ class __model__():
 
     @lru_cache(maxsize=10)
     def get_mod(self, folder_name, ctx, checkpoint_name=None, batch_size=None, longth_=None, width_=None):
-        if folder_name not in ['ssd', 'retrieval']:
+        if folder_name not in ['first', 'second','detect']:
             logger.info('load model')
             sym, arg_params, aux_params = mx.model.load_checkpoint(join(folder_name, checkpoint_name), 0)
             mod = mx.mod.Module(symbol=sym, context=ctx, label_names=None)

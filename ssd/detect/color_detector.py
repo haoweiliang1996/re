@@ -1,10 +1,11 @@
-import numpy as np
 import mxnet as mx
+
 from ssd.detect.detector import Detector
 
 
+# Todo 这里和试验的时候不一致
 class ColorDetector(Detector):
-    def visualize_detection_to_memory(self, img, dets, classes=[], thresh=0.6, img_name='test.jpg', output_dir='.'):
+    def visualize_detection_to_memory(self, img, dets, classes=[], thresh=0.25, img_name='test.jpg', output_dir='.',show_img = False):
         """
         visualize detections to memory
 
@@ -35,5 +36,9 @@ class ColorDetector(Detector):
                     img_out = img[ymin:ymax, xmin:xmax]
                     res.append(img_out)
         if len(res) == 0:
-            res = [mx.image.CenterCropAug((112, 112))(mx.nd.array(img)).asnumpy(),]
-        return None,res
+            res = [mx.image.CenterCropAug((112, 112))(mx.nd.array(img)).asnumpy(), ]
+        return None, res
+
+if __name__ == '__main__':
+    pass
+

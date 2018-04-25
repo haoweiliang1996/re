@@ -143,25 +143,4 @@ if __name__ == '__main__':
         get_ssd_model()
     except KeyError as e:
         print(e)
-    # parse image list
-    '''
-    image_list = [i.strip() for i in args.images.split(',')]
-    import os
 
-    image_list = list(filter(lambda s: s.endswith('jpg'), os.listdir(args.dir)))
-    assert len(image_list) > 0, "No valid image specified to detect"
-
-    network = None if args.deploy_net else args.network
-    class_names = parse_class_names(args.class_names)
-    if args.prefix.endswith('_'):
-        prefix = args.prefix + args.network + '_' + str(args.data_shape)
-    else:
-        prefix = args.prefix
-    detector = get_detector(network, prefix, args.epoch,
-                            args.data_shape,
-                            (args.mean_r, args.mean_g, args.mean_b),
-                            ctx, len(class_names), args.nms_thresh, args.force_nms)
-    # run detection
-    detector.detect_and_save(image_list, args.dir, args.extension,
-                             class_names, args.thresh, args.show_timer, args.output_dir)
-    '''

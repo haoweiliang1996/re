@@ -3,6 +3,7 @@ import numpy as np
 from mxnet import image
 from mxnet import nd
 
+# aug 没有改变
 augs = image.CreateAugmenter(data_shape=(3, 224, 224), rand_mirror=True, rand_crop=True, rand_resize=False,
                              brightness=0.125, contrast=0.125, saturation=0.125)
 augs_val = image.CreateAugmenter(data_shape=(3, 224, 224), rand_crop=False, rand_mirror=False)
