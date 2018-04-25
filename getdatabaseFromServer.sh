@@ -15,4 +15,29 @@ echo $dataset_part
 #scp -r lhw@\[$SIXNIGHT\]:/home/lhw/cloth/mxnet-ssd/model/cloth_t3/ssd-symbol.json ./ssd/model/type3/
 #scp -r lhw@\[$SIXNIGHT\]:/home/lhw/cloth/mxnet-ssd/model/cloth_t3/ssd-0225.params ./ssd/model/type3/ssd-0000.params
 #scp -r lhw@\[$SIXNIGHT\]:/home/lhw/cloth/mxnet-classify/mxsymbol/symbol_unittest.py ./retrieval/mxsymbol
-scp -r lhw@\[$SIXEIGHT\]:/home/lhw/cloth/mxnet-classify/checkpoint/clothall/cloth4c/densenet201/net_best.params ./retrieval/attr/checkpoint
+#scp -r lhw@\[$SIXEIGHT\]:/home/lhw/cloth/mxnet-classify/checkpoint/clothall/cloth4c/densenet201/net_best.params ./retrieval/attr/checkpoint
+
+
+for dataset_id in 4 5 7
+do
+dataset_part=cloth${dataset_id}
+echo $dataset_part
+#scp -r lhw@\[$SIXEIGHT\]:~/cloth/mxnet-classify/retrieval/clothall/$dataset_part/densenet201/densenet201_1920/cropus.npy ./retrieval/cropus/database/$dataset_id/cropus1920.npy
+#ssh lhw@$SIXEIGHT md5sum /home/lhw/cloth/mxnet-classify/checkpoint/clothall/$dataset_part/densenet201/net_best.params
+#scp -r lhw@\[$SIXEIGHT\]:/home/lhw/cloth/mxnet-classify/checkpoint/clothall/$dataset_part/densenet201/net_best.params ./retrieval/checkpoint/$dataset_id/net_best.params
+#md5 ./retrieval/checkpoint/$dataset_id/net_best.params
+### hist ###
+#from=/home/lhw/cloth/mxnet-classify/data/hist/clothall/$dataset_part/cropus_hist.npy
+#to=./retrieval/cropus/hist/$dataset_id/cropus_hist.npy
+
+### index ###
+from=/home/lhw/cloth/clothdata/clothindex/$dataset_id/cropus.lst
+to=./retrieval/cropus/index/$dataset_id/cropus.lst
+ssh lhw@$SIXEIGHT md5sum $from
+scp -r lhw@\[$SIXEIGHT\]:$from $to
+md5 $to
+done
+
+
+##touch .gitkeep for data store folder
+#hist,params,database

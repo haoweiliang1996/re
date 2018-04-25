@@ -1,8 +1,3 @@
-'''
-    允许自定义输入的文件库，支持保存本地索引库，argmax
-    do PCA,and l2_norm
-'''
-
 import os
 import sys
 
@@ -10,7 +5,6 @@ from logger import logger
 
 curr_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(curr_path, '../../'))
-sys.path.append(os.path.join(curr_path, '..'))
 import os.path as osp
 
 # define a simple data batch
@@ -30,15 +24,9 @@ class Retrieval_model():
         self.DEBUG = False
         self.prefix = 'retrieval'
         self.first_class_id = str(first_class_id)
-        # self.pca = decomposition.PCA(n_components=128)
-        '''
-        with open(osp.join(self.prefix,'checkpoint','PCA_model.pickle'),'rb') as f:
-            self.pca = pickle.load(f)
-        '''
         self.ctx = ctx
-        self.model = self.get_mod(folder_name='retrieval/checkpoint/%d' % self.first_class_id,
+        self.model = self.get_mod(folder_name=osp.join(curr_path,'../../','retrieval/checkpoint/%s' % self.first_class_id),
                                   checkpoint_name='net_best.params', ctx=ctx)
-        # self.anchors_data, self.cropus_data = self.load_search_database('database_sm128')
         self.database = self.load_search_database(
             [osp.join('database', self.first_class_id), ])
 
@@ -46,7 +34,7 @@ class Retrieval_model():
         self.cropus_hist = self.load_hist_database()
 
     def load_hist_database(self):
-        base = osp.join('retrieval/cropus/hist', self.first_class_id)
+        base = osp.join(curr_path,'../../','retrieval/cropus/hist', self.first_class_id)
         hist_path = osp.join(base, 'cropus_hist.npy')
         assert osp.exists(hist_path), 'hist %s not found' % hist_path
         return np.load(hist_path)
@@ -80,13 +68,13 @@ class Retrieval_model():
     def load_search_database(self, kinds):
         res = []
         for kind in kinds:
-            cropus_datapath = osp.join('retrieval/cropus', kind, 'cropus1920.npy')
+            cropus_datapath = osp.join(curr_path,'../../','retrieval/cropus', kind, 'cropus1920.npy')
             assert osp.exists(cropus_datapath), 'No cropus'
             res.append(np.load(cropus_datapath))
         return res
 
     def load_search_index(self):
-        p = osp.join('retrieval/cropus/index', self.first_class_id)
+        p = osp.join(curr_path,'../../','retrieval/cropus/index', self.first_class_id)
         cropus_datapath = osp.join(p, 'cropus.lst')
 
         def get_index(fn):
@@ -122,7 +110,9 @@ class Retrieval_model():
     def search_database(self, img, cropus_data, color_level, style_level):
         dof_threshold_config = {
             6: ([0.24, 0.26, 0.28], [6, 20], 2048, 64),
-            4: ([0.18, 0.20, 0.22], [8, 10], 2048 * 4, 512)
+            4: ([0.18, 0.20, 0.22], [8, 10], 2048 * 4, 512),
+            5: ([0.18, 0.20, 0.22], [8, 10], 2048 * 4, 512),
+            7: ([0.18, 0.20, 0.22], [8, 10], 2048 * 4, 512)
         }
         threshold_styles, color_styles, c1, c2 = dof_threshold_config[int(self.first_class_id)]
         threshold_style = threshold_styles[style_level]
@@ -162,18 +152,20 @@ class Retrieval_model():
 
 
 if __name__ == '__main__':
-    model = Retrieval_model(ctx=mx.cpu())
-    pairs_json = {}
-    tic = time()
-    # print(model.search('820115'))
-    # imglist = read_to_list(test_txt_path)
+    img = cv2.imread('../demo/2.png')
+    for first_class_id in [5,6,7]:
+        model = Retrieval_model(ctx=mx.cpu(), first_class_id=first_class_id)
+        pairs_json = {}
+        tic = time()
+        res = model.search_database(img, model.database[0],0,0)
+        print(res[:8])
+        # print(model.search('820115'))
+        # imglist = read_to_list(test_txt_path)
 
-    tic = time()
-    fea1 = model.get_fetaure('../demo/2.png', tt=1)
-    print(time() - tic)
-    import time
+        #fea1 = model.get_feature(img)
+        print(time() - tic)
 
-    time.sleep(1000)
+    #time.sleep(1000)
     '''
     print(nd.sum(fea1 == 0))
     fea2 = nd.stack(*[model.get_feature(osp.join('../demo', i)) for i in

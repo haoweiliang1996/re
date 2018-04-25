@@ -1,5 +1,10 @@
 import logging
 import logging.handlers
+import os
+
+curr_path = os.path.abspath(os.path.dirname(__file__))
+
+
 def _init_logger(this_logger, file_path):
     this_logger.setLevel(logging.DEBUG)
     fmt = logging.Formatter(
@@ -15,6 +20,6 @@ def _init_logger(this_logger, file_path):
     this_logger.addHandler(trfh)
 
 
-logFilename = 'log/log'
+logFilename = os.path.join(curr_path,'log/log')
 logger = logging.getLogger('monitor')
 _init_logger(logger, logFilename)

@@ -11,7 +11,7 @@ import requests
 from os.path import join
 
 from logger import logger
-from retrieval.retrieval.retrieval import Retrieval_model
+from retrieval.retrieval.retrieval_model import Retrieval_model
 from ssd import demo
 from ssd.detect.detector import Detector
 
