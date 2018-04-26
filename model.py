@@ -27,7 +27,7 @@ class __model__():
         self.table = pd.read_excel('data.xlsx')
         self.DEBUG = False
 
-    @lru_cache(maxsize=10)
+    @lru_cache(maxsize=13)
     def get_mod(self, folder_name, ctx, checkpoint_name=None, batch_size=None, longth_=None, width_=None):
         """
         use get_mod to save model to memory
@@ -40,7 +40,7 @@ class __model__():
         :return: a model for some task
         """
         tic = time()
-        if folder_name in ['first', 'second', 'detect']:
+        if folder_name in ['first', 'second', 'detect'] or folder_name.find('second') == 0:
             sym, arg_params, aux_params = mx.model.load_checkpoint(join(folder_name, checkpoint_name), 0)
             mod = mx.mod.Module(symbol=sym, context=ctx, label_names=None)
             mod.bind(for_training=False, data_shapes=[('data', (batch_size, 3, longth_, width_))],
