@@ -70,8 +70,6 @@ class ColorClassifier():
         if cc > 2:
             logger.info('zero in color more than two')
             raise RuntimeError('zero in color more than two')
-        if cc == 2:
-            flag = 0
         else:
             flag = int(np.sum(np.unique(flatten)))
         logger.info('flag :%s, preds %s' % (flag, str(preds)))

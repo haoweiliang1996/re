@@ -60,7 +60,7 @@ class Retrieval_model():
                 c_detector.visualize_detection_matplot(pos, img1)
             res = []
             for i in range(len(imgs)):
-                img = imgs[i].astype(np.uint8)
+                img = imgs[i].asnumpy().astype(np.uint8)
                 if kwargs.get('debug') is not None:
                     plt.imshow(img)
                 img = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)  # 在cvtColor前要先变成uint8

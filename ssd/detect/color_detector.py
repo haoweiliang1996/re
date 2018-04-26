@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     #img = cv2.imread(os.path.join('/Users/haowei/Downloads', '37245de15c3e400b8e30b61c32422f7a.jpg'))
     img = cv2.cvtColor(cv2.imread(os.path.join('/Users/haowei/Downloads',
-                                               '37245de15c3e400b8e30b61c32422f7a.jpg')),
+                                               'mmexport1524744468360.jpg')),
                        cv2.COLOR_BGR2RGB)
     pos, imgs = model.detect_and_return(img, thresh=0.24)
     model.visualize_detection_matplot(pos, img)
