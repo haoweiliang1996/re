@@ -60,8 +60,8 @@ class Retrieval_model():
                 c_detector.visualize_detection_matplot(pos, img1)
             res = []
             for i in range(len(imgs)):
+                img = imgs[i].astype(np.uint8)
                 if kwargs.get('debug') is not None:
-                    img = imgs[i].astype(np.uint8)
                     plt.imshow(img)
                 img = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)  # 在cvtColor前要先变成uint8
                 m = np.mean(np.transpose(img, (2, 0, 1)), axis=(1, 2))
@@ -135,7 +135,8 @@ class Retrieval_model():
             anchor_hist = self.get_hist(img)
         tic = time()
         fea_dist = np.sum((cropus_data - anchor) ** 2, axis=1)
-        logger.info('use %s second to cal distance' % (time() - tic))
+        tic2 = time()
+        logger.info('use %s second to cal distance' % (tic2 - tic))
         res = list(map(lambda x: x, filter(lambda x: fea_dist[x] < threshold_style, np.argsort(fea_dist)[:c1])))
         cropus_hists = self.cropus_hist[res]
         distance = np.arange(cropus_hists.shape[0]).astype(np.float32)
