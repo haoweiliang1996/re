@@ -27,7 +27,7 @@ class __model__():
         self.table = pd.read_excel('data.xlsx')
         self.DEBUG = False
 
-    @lru_cache(maxsize=10)
+    @lru_cache(maxsize=13)
     def get_mod(self, folder_name, ctx, checkpoint_name=None, batch_size=None, longth_=None, width_=None):
         """
         use get_mod to save model to memory
@@ -123,7 +123,7 @@ class __model__():
         tic2 = time()
         folder_name = 'retrieval_%s' % first_class_id
         mod = self.get_mod(folder_name=folder_name, ctx=ctx)
-        if int(first_class_id) == 4:
+        if int(first_class_id) in [4,5]:
             res = mod.search_database(img, mod.database[0], color_level, style_level,
                                       color_detector=self.get_mod(folder_name='ssd_maincolor', ctx=ctx))
         else:

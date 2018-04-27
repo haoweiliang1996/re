@@ -12,6 +12,7 @@ from mxnet import nd
 from retrieval.dataloader.transform import transform_val
 from retrieval.mxsymbol.symbol_factory import multiTaskClassifyNetwork
 from logger import logger
+from time import time
 
 
 class ColorClassifier():
@@ -25,6 +26,7 @@ class ColorClassifier():
         self.ctx = ctx
 
     def predict(self, img):
+        tic = time()
         if not isinstance(img, nd.NDArray):
             img = nd.array(img)
         img = nd.array(img)
@@ -70,9 +72,12 @@ class ColorClassifier():
         if cc > 2:
             logger.info('zero in color more than two')
             raise RuntimeError('zero in color more than two')
+        if preds[0][0] == 0 and preds[1][0] == 0:
+            flag = 0
         else:
             flag = int(np.sum(np.unique(flatten)))
         logger.info('flag :%s, preds %s' % (flag, str(preds)))
+        logger.info('color classifyier use time %s'%(time()-tic))
         return flag
 
 
