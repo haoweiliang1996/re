@@ -22,7 +22,7 @@ def first():
     js = ((request.get_json()))
     js['imgId'] = '0'
     logger.info(js)
-    res = str(model.do_multi_predict(image_url=js['url'], model_level=int(1), img_id=str(js['imgId']), tt=2))
+    res = str(model.do_multi_predict(image_url=js['url'], model_level=int(1), img_id=str(js['imgId']), tt=1))
     logger.info(res)
     return res
 
@@ -35,7 +35,7 @@ def second():
     if str(js['class1']) not in ['1', '4', '5', '7', '10']:
         return 'model not trained yet'
     res = str(model.do_multi_predict(image_url=js['url'], model_level=int(2), first_class_id=int(js['class1']),
-                                     img_id=str(js['imgId']), tt=3))
+                                     img_id=str(js['imgId']), tt=1))
     logger.info(res)
     return res
 
