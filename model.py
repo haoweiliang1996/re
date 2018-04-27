@@ -106,7 +106,7 @@ class __model__():
         mod = self.get_mod(folder_name=folder_name, ctx=ctx)
         img, _ = self.get_img(image_url, 10002)
         tic3 = time()
-        _det, img = mod.detect_and_return(img, thresh=0.5)
+        _det, img = mod.detect_and_return(img, thresh=0.1)
         logger.info('use {}s to ssd t3'.format(str(time() - tic3)))
         return _det, img
 
@@ -122,7 +122,7 @@ class __model__():
         tic2 = time()
         folder_name = 'retrieval_%s' % first_class_id
         mod = self.get_mod(folder_name=folder_name, ctx=ctx)
-        if int(first_class_id) == 4:
+        if int(first_class_id) in [4,5]:
             res = mod.search_database(img, mod.database[0], color_level, style_level,
                                       color_detector=self.get_mod(folder_name='ssd_maincolor', ctx=ctx))
         else:

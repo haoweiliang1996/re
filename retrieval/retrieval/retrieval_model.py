@@ -46,7 +46,7 @@ class Retrieval_model():
             img1 = nd.array(img)
         else:
             img1 = img
-        if int(self.first_class_id) != 4:
+        if int(self.first_class_id) not in [4,5]:
             img1 = mx.img.resize_short(img1, 224)
             img1 = mx.img.center_crop(img1, (112, 112))[0].asnumpy().astype(np.uint8)
             img = cv2.cvtColor(img1, cv2.COLOR_RGB2LAB)
@@ -60,8 +60,8 @@ class Retrieval_model():
                 c_detector.visualize_detection_matplot(pos, img1)
             res = []
             for i in range(len(imgs)):
+                img = imgs[i].asnumpy().astype(np.uint8)
                 if kwargs.get('debug') is not None:
-                    img = imgs[i].astype(np.uint8)
                     plt.imshow(img)
                 img = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)  # 在cvtColor前要先变成uint8
                 m = np.mean(np.transpose(img, (2, 0, 1)), axis=(1, 2))
@@ -120,16 +120,16 @@ class Retrieval_model():
 
     def search_database(self, img, cropus_data, color_level, style_level, **kwargs):
         dof_threshold_config = {
-            6: ([0.24, 0.26, 0.28], [6, 20], 2048, 64),
-            4: ([0.20, 0.21, 0.22], [8, 10], 2048 * 4, 512),
-            5: ([0.20, 0.21, 0.22], [8, 10], 2048 * 4, 512),
-            7: ([0.20, 0.21, 0.22], [8, 10], 2048 * 4, 512)
+            6: ([0.24, 0.26, 0.28], [6,6,20], 2048, 64),
+            4: ([0.20, 0.21, 0.22], [8,8,10], 2048 * 4, 512),
+            5: ([0.20, 0.21, 0.22], [8,6,10], 2048 * 4, 512),
+            7: ([0.20, 0.21, 0.22], [8,8,10], 2048 * 4, 512)
         }
         threshold_styles, color_styles, c1, c2 = dof_threshold_config[int(self.first_class_id)]
         threshold_style = threshold_styles[style_level]
         color_style = color_styles[color_level]
         anchor = self.get_feature(img)
-        if int(self.first_class_id) == 4:
+        if int(self.first_class_id) in [4,5]:
             anchor_hist = self.get_hist(img, color_detector=kwargs['color_detector'])
         else:
             anchor_hist = self.get_hist(img)
