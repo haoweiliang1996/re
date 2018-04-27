@@ -40,7 +40,8 @@ class __model__():
         :return: a model for some task
         """
         tic = time()
-        if folder_name in ['first', 'second', 'detect'] or folder_name.find('second') == 0:
+        logger.info('folder name %s' % folder_name)
+        if folder_name in ['first', 'detect'] or folder_name.find('second') == 0:
             sym, arg_params, aux_params = mx.model.load_checkpoint(join(folder_name, checkpoint_name), 0)
             mod = mx.mod.Module(symbol=sym, context=ctx, label_names=None)
             mod.bind(for_training=False, data_shapes=[('data', (batch_size, 3, longth_, width_))],
@@ -63,7 +64,7 @@ class __model__():
             if suffix == 'color':
                 mod = ColorClassifier(ctx=ctx)
         else:
-            raise NotImplementedError('No Such model')
+            raise NotImplementedError('No Such model %s' % folder_name)
         logger.info('use %f second to load %s' % (time() - tic, folder_name))
         return mod
 
@@ -131,11 +132,10 @@ class __model__():
         return res
 
     @lru_cache(maxsize=128)
-    def do_color_predict(self,image_url,ctx=mx.cpu()):
-        color_classifier = self.get_mod(folder_name='attr_color',ctx=ctx)
+    def do_color_predict(self, image_url, ctx=mx.cpu()):
+        color_classifier = self.get_mod(folder_name='attr_color', ctx=ctx)
         img, origin_img = self.get_img(url=image_url, model_level=10002)
         return color_classifier.predict(img)
-
 
     # @lru_cache()
     def do_multi_predict(self, image_url, model_level, img_id, first_class_id=None, num_id=None, batch_size=1, tt=1,
@@ -242,4 +242,5 @@ class __model__():
 
 model = __model__()
 if __name__ == '__main__':
-    print(model.do_color_predict(image_url='http://cdn.watoo11.com/wardrobe/201702/2017021920525869343.jpg?x-oss-process=image/resize,w_310'))
+    print(model.do_color_predict(
+        image_url='http://cdn.watoo11.com/wardrobe/201702/2017021920525869343.jpg?x-oss-process=image/resize,w_310'))

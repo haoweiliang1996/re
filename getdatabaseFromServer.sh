@@ -33,6 +33,10 @@ echo $dataset_part
 ### index ###
 from=/home/lhw/cloth/clothdata/clothindex/$dataset_id/cropus.lst
 to=./retrieval/cropus/index/$dataset_id/cropus.lst
+
+### color classify ###
+from=/home/lhw/cloth/clothdata/clothindex/$dataset_id/cropus.lst
+to=./retrieval/cropus/index/$dataset_id/cropus.lst
 ssh lhw@$SIXEIGHT md5sum $from
 scp -r lhw@\[$SIXEIGHT\]:$from $to
 md5 $to
