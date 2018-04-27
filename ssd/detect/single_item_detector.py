@@ -49,6 +49,7 @@ if __name__ == '__main__':
 
     img = cv2.imread(os.path.join('/Users/haowei/Downloads', 'mmexport1524748553162.jpg'))
     img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+
     pos, imgs = model.detect_and_return(img, thresh=0.1)
     model.visualize_detection_matplot(pos, img)
     if not isinstance(imgs,list):
