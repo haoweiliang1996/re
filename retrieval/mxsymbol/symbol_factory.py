@@ -47,9 +47,8 @@ def validate(net, val_data, ctx, select_index):
     return ((val_accs, 0 / len(val_data)))
 
 
-def _get_symbol(model_name, ctx=mx.cpu(), pretrained=True):
-    finetune_net = gluon.model_zoo.vision.get_model(model_name, pretrained=True).features
-    finetune_net.collect_params().reset_ctx(ctx)
+def _get_symbol(model_name, ctx=mx.cpu(), pretrained=False):
+    finetune_net = gluon.model_zoo.vision.get_model(model_name, pretrained=pretrained,ctx=ctx).features
     return finetune_net
 
 

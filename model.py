@@ -58,6 +58,7 @@ class __model__():
             mod = demo.get_ssd_model(detector_class=detector, ctx=ctx,
                                      prefix='ssd/checkpoint/%s/ssd' % suffix)
         elif folder_name.find('retrieval_') == 0:
+            suffix = folder_name.replace('retrieval_','')
             mod = Retrieval_model(ctx=ctx, first_class_id=int(folder_name.replace('retrieval_', '')))
         elif folder_name.find('attr_') == 0:
             suffix = folder_name.replace('attr_', '')
@@ -101,7 +102,6 @@ class __model__():
         logger.info('use %f seconds to get img' % (time() - tic))
         return img, origin_img
 
-    @lru_cache(maxsize=16)
     def ssd(self, image_url, model_name, ctx):
         folder_name = 'ssd_%s' % model_name
         mod = self.get_mod(folder_name=folder_name, ctx=ctx)
@@ -111,7 +111,7 @@ class __model__():
         logger.info('use {}s to ssd t3'.format(str(time() - tic3)))
         return _det, img
 
-    @lru_cache(maxsize=32)
+    @lru_cache(maxsize=8)
     def retrieval(self, image_url, first_class_id, color_level=1, style_level=0, ctx=mx.cpu()):
         tic = time()
         _det, img = self.ssd(image_url, 'type3', ctx=ctx)
@@ -131,7 +131,7 @@ class __model__():
         logger.info('use {}s to search database '.format(str(time() - tic2)))
         return res
 
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=8)
     def do_color_predict(self, image_url, ctx=mx.cpu()):
         color_classifier = self.get_mod(folder_name='attr_color', ctx=ctx)
         img, origin_img = self.get_img(url=image_url, model_level=10002)

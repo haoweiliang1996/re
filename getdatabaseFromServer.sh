@@ -45,6 +45,9 @@ to=./retrieval/checkpoint/$dataset_id/net_best.params
 ### color classify ###
 #from=/home/lhw/cloth/clothdata/clothindex/$dataset_id/cropus.lst
 #to=./retrieval/cropus/index/$dataset_id/cropus.lst
+
+from=/home/lhw/cloth/mxnet-classify/dataloader/transform.py
+to=./retrieval/dataloader/transform.py
 ssh lhw@$SIXEIGHT md5sum $from
 scp -r lhw@\[$SIXEIGHT\]:$from $to
 md5 $to

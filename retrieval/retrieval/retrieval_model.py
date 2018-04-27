@@ -16,7 +16,7 @@ import cv2
 from mxnet import nd
 from time import time
 
-from retrieval.dataloader.transform import transform_test
+from retrieval.dataloader.transform import transform_test, transform_padlong
 from retrieval.mxsymbol import symbol_factory
 
 
@@ -25,10 +25,15 @@ class Retrieval_model():
         self.DEBUG = False
         self.prefix = 'retrieval'
         self.first_class_id = str(first_class_id)
+        if int(first_class_id) in [5, ]:
+            model = 'resnet50_v2'
+        else:
+            model = 'densenet201'
+        logger.info('use model %s to get fea' % model)
         self.ctx = ctx
         self.model = self.get_mod(
             folder_name=osp.join(curr_path, '../../', 'retrieval/checkpoint/%s' % self.first_class_id),
-            checkpoint_name='net_best.params', ctx=ctx)
+            checkpoint_name='net_best.params', ctx=ctx, model=model)
         self.database = self.load_search_database(
             [osp.join('database', self.first_class_id), ])
 
@@ -46,7 +51,7 @@ class Retrieval_model():
             img1 = nd.array(img)
         else:
             img1 = img
-        if int(self.first_class_id) not in [4,5]:
+        if int(self.first_class_id) not in [4, 5]:
             img1 = mx.img.resize_short(img1, 224)
             img1 = mx.img.center_crop(img1, (112, 112))[0].asnumpy().astype(np.uint8)
             img = cv2.cvtColor(img1, cv2.COLOR_RGB2LAB)
@@ -99,11 +104,18 @@ class Retrieval_model():
         return get_index(cropus_datapath)
 
     def get_feature(self, img):
+        tic = time()
         if not isinstance(img, nd.NDArray):
             img = nd.array(img)
         cv2.imwrite('test.jpg', img.asnumpy())
-        imgs = transform_test(img)
-        fea = nd.mean(self.model(imgs), axis=0)
+        if int(self.first_class_id) in [5, ]:
+            img, _ = transform_padlong(img, None)
+            img = nd.stack(*[img,])
+            fea = self.model(img)
+        else:
+            imgs = transform_test(img)
+            fea = nd.mean(self.model(imgs), axis=0)
+        logger.info('use %s to get fea' % (time() - tic))
         '''
         fea = \
         logger.info('h1')
@@ -120,16 +132,16 @@ class Retrieval_model():
 
     def search_database(self, img, cropus_data, color_level, style_level, **kwargs):
         dof_threshold_config = {
-            6: ([0.24, 0.26, 0.28], [6,6,20], 2048, 64),
-            4: ([0.20, 0.21, 0.22], [8,8,10], 2048 * 4, 512),
-            5: ([0.20, 0.21, 0.22], [8,6,10], 2048 * 4, 512),
-            7: ([0.20, 0.21, 0.22], [8,8,10], 2048 * 4, 512)
+            6: ([0.24, 0.26, 0.28], [6, 6, 20], 2048, 64),
+            4: ([0.20, 0.21, 0.22], [8, 8, 10], 2048 * 4, 512),
+            5: ([0.20, 0.21, 0.22], [8, 6, 10], 2048 * 4, 512),
+            7: ([0.20, 0.21, 0.22], [8, 8, 10], 2048 * 4, 512)
         }
         threshold_styles, color_styles, c1, c2 = dof_threshold_config[int(self.first_class_id)]
         threshold_style = threshold_styles[style_level]
         color_style = color_styles[color_level]
         anchor = self.get_feature(img)
-        if int(self.first_class_id) in [4,5]:
+        if int(self.first_class_id) in [4, 5]:
             anchor_hist = self.get_hist(img, color_detector=kwargs['color_detector'])
         else:
             anchor_hist = self.get_hist(img)
@@ -161,8 +173,8 @@ class Retrieval_model():
             logger.info('result counts less than 10')
         return res
 
-    def get_mod(self, folder_name, checkpoint_name, ctx=mx.cpu()):
-        net = symbol_factory.get_test_symbol(ctx=ctx)
+    def get_mod(self, folder_name, checkpoint_name, model, ctx=mx.cpu()):
+        net = symbol_factory.get_test_symbol(net_work=model, ctx=ctx)
         net.load_params(osp.join(folder_name, checkpoint_name), ctx=ctx)
         net.hybridize()
         return net
@@ -176,12 +188,12 @@ if __name__ == '__main__':
                                         prefix=os.path.join(curr_path, '../../ssd', 'checkpoint', 'maincolor', 'ssd'),
                                         ctx=mx.cpu())
     img = cv2.cvtColor(cv2.imread(os.path.join('/Users/haowei/Downloads',
-                                               '37245de15c3e400b8e30b61c32422f7a.jpg')),
+                                               'mmexport1524748107151.jpg')),
                        cv2.COLOR_BGR2RGB)
 
     plt.imshow(img)
     plt.show()
-    for first_class_id in [4, ]:
+    for first_class_id in [5,4,6,7 ]:
         model = Retrieval_model(ctx=mx.cpu(), first_class_id=first_class_id)
         pairs_json = {}
         tic = time()
