@@ -32,8 +32,11 @@ class ColorClassifier():
         img = nd.array(img)
         img, _ = transform_val(img, None)
 
-        outputs = self.net(nd.array(img.asnumpy()[np.newaxis, :], ctx=self.ctx))
-        outputs = [nd.softmax(i, axis=1) for i in outputs]
+        img = nd.stack(*[img,])
+        outputs = self.net(img)
+
+        #todo asnumpy is very slow ,cost about 0.2 second
+        outputs = [nd.softmax(i, axis=1).asnumpy() for i in outputs]
 
         preds = []
         index2label = [0, 4096, 2048
@@ -53,10 +56,10 @@ class ColorClassifier():
             , 1024]
         for k in range(len(self.lenof_labels)):
             # pdb.set_trace()
-            sort_index = nd.argsort(outputs[k], axis=1)[0].asnumpy()[::-1].astype(np.int32)
+            sort_index = np.argsort(outputs[k], axis=1)[0][::-1].astype(np.int32)
             res = []
-            for i in sort_index:
-                i = int(i)
+            for idx in sort_index:
+                i = int(sort_index[idx])
                 if outputs[k][0][i] >= 0.2:
                     res.append(index2label[i])
             res = res[:3]
@@ -83,4 +86,4 @@ class ColorClassifier():
 
 if __name__ == '__main__':
     model = ColorClassifier(ctx=mx.cpu())
-    print(model.predict(cv2.imread(os.path.join('/Users/haowei/Downloads', '2017030919492019570.jpg'))))
+    print(model.predict(cv2.imread(os.path.join('/Users/haowei/Downloads', '55a688bd-a908-4c50-a69e-2425c7802702.jpg'))))

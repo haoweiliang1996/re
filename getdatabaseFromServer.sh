@@ -46,11 +46,18 @@ to=./retrieval/checkpoint/$dataset_id/net_best.params
 #from=/home/lhw/cloth/clothdata/clothindex/$dataset_id/cropus.lst
 #to=./retrieval/cropus/index/$dataset_id/cropus.lst
 
-from=/home/lhw/cloth/mxnet-classify/dataloader/transform.py
-to=./retrieval/dataloader/transform.py
-ssh lhw@$SIXEIGHT md5sum $from
-scp -r lhw@\[$SIXEIGHT\]:$from $to
-md5 $to
+#from=/home/lhw/cloth/mxnet-classify/dataloader/transform.py
+#to=./retrieval/dataloader/transform.py
+#ssh lhw@$SIXEIGHT md5sum $from
+#scp -r lhw@\[$SIXEIGHT\]:$from $to
+#md5 $to
+#from=./retrieval/checkpoint/5/net_best.params
+#to=/root/ret/upload/retrieval/checkpoint/5/net_best.params
+from=./retrieval/cropus/database/$dataset_id/cropus1920.npy
+to=/root/ret/upload/retrieval/cropus/database/$dataset_id/cropus1920.npy
+md5 $from
+scp -r $from root@47.104.25.10:$to
+ssh root@47.104.25.10 md5sum $to
 done
 
 
