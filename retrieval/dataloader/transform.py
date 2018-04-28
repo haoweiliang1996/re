@@ -91,14 +91,11 @@ def transform_padlong(data,label):
     img = cv2.copyMakeBorder(img,pad_width,pad_width,pad_width,pad_width,cv2.BORDER_CONSTANT,value=fill_value)
     img = mx.nd.array(img)
     img, _ = image.center_crop(img, (180, 320))
-    import matplotlib.pyplot as plt
-    plt.imshow(img.asnumpy())
-    plt.show()
     return nd.transpose(mx.image.color_normalize(img.astype(np.float32) / 255,
                                                     mean=mx.nd.array([0.485, 0.456, 0.406]),
                                                     std=mx.nd.array([0.229, 0.224, 0.225])), (2, 0, 1)),label
 
-patch_width = 56;
+patch_width = 56
 patch_pad = int(patch_width / 2)
 def fix_crop_hist(src, tu):
     x, y = tu
